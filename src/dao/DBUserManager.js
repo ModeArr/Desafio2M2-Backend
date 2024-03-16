@@ -1,15 +1,15 @@
 const userModel = require('./models/user.models')
+const { isValidPasswd, createHash } = require("../utils/encrypt");
 
 class DBUserManager {
 
-    async checkUser(email, password) {
+    async checkUserAndPass(email, password) {
         try {
-            console.log(email, password)
             const findUser = await userModel.findOne({ email }).lean()
 
             if (!findUser) throw Error("Usuario no registrado")
 
-            if (findUser.password !== password) throw Error("Contrasena incorrecta")
+            if (!isValidPasswd(password, findUser.password)) throw Error("Contrasena incorrecta")
             
             delete findUser.password
 
@@ -22,7 +22,6 @@ class DBUserManager {
 
     async addUser(first_name, last_name, email, password) {
         try {   
-            console.log(first_name, last_name, email, password)         
             if (!first_name.trim()){
                 throw new Error('Ingresa un Nombre correcto')
             }
@@ -38,12 +37,14 @@ class DBUserManager {
             if (!password.trim()) {
                 throw new Error('Ingresa una contrasena')
             }
+
+            const pswHashed = await createHash(password)
     
             const user = {
                 first_name,
                 last_name,
                 email,
-                password
+                password: pswHashed
             }
 
             let result = await userModel.create(user).then((res) => {
@@ -55,6 +56,27 @@ class DBUserManager {
         } catch (error) {
             throw Error(error)
         }
+    }
+
+    async checkUserID(id) {
+        try {
+            const findUser = await userModel.findById(id).lean()
+            return findUser
+
+        } catch (error) {
+            throw Error(error)
+        }  
+    }
+
+    async checkUser(email) {
+        try {
+            const findUser = await userModel.findOne({ email }).lean()
+
+            return findUser
+
+        } catch (error) {
+            throw Error(error)
+        }  
     }
 
 }

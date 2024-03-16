@@ -1,5 +1,5 @@
 function authMdw(req, res, next) {
-    if (req.session?.user) {
+    if (req.session?.passport?.user) {
       return next();
     }
   
@@ -7,7 +7,7 @@ function authMdw(req, res, next) {
   }
 
   function loggedRedirect(req, res, next) {
-    if (req.session?.user) {
+    if (req.session?.passport?.user) {
       return res.redirect("/")
     }
   

@@ -31,13 +31,12 @@ router.get('/', authMdw, (req, res) => {
     const url = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
 
     products.getProducts(page, limit, sort, query, url).then(result => {
-        console.log(req.session.user)
         res.render("index", {
             title: "Desafio 1 Modulo 2",
             products: result.payload,
             nextPage: result.nextLink,
             prevPage: result.prevLink,
-            user: req.session.user,
+            user: req.session.passport.user,
             style: "styles.css"
         })
     }).catch(err => {
@@ -69,7 +68,7 @@ router.get('/realtimeproducts', authMdw, (req, res) => {
             products: result.payload,
             nextPage: result.nextLink,
             prevPage: result.prevLink,
-            user: req.session.user
+            user: req.session.passport.user
         })
     }).catch(err => {
         console.log(err);
@@ -113,7 +112,7 @@ router.get('/products', authMdw, (req, res) => {
             products: result.payload,
             nextPage: result.nextLink,
             prevPage: result.prevLink,
-            user: req.session.user,
+            user: req.session.passport.user,
             style: "styles.css"
         })
     }).catch(err => {
@@ -126,7 +125,6 @@ router.get('/carts/:cid', authMdw, (req, res) => {
     const idCart = req.params.cid
 
     cart.getCartProducts(idCart).then(result => {
-        console.log(result)
         res.render("cart", {
             title: "Desafio 1 Modulo 2 - Carrito de Compras",
             product: result

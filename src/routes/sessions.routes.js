@@ -1,6 +1,5 @@
 const { Router } = require("express");
-const DBUserManager = require("../dao/DBUserManager");
-const userManager = new DBUserManager()
+const passport = require("passport");
 
 const router = Router();
 
@@ -11,45 +10,16 @@ router.get("/logout", (req, res) => {
   });
 });
 
-router.post("/login", (req, res) => {
-    const { email, password } = req.body;
-    const session = req.session;
+router.post("/login", passport.authenticate('login', {
+  successRedirect: '/',
+  failureRedirect: '/login',
+  failureFlash: true,
+}));
 
-    userManager.checkUser(email, password)
-    .then((result) => {
-      console.log(result)
-      console.log(session)
-      session.user = {...result};
-      res.redirect('../../products')
-      console.log(session)
-    })
-    .catch((error) => {
-      res.status(400).json(error.message)
-    })
-});
-
-router.post("/register", (req, res) => {
-
-    console.log("BODY REGISTER***", req.body);
-    const newUser = req.body;
-
-    console.log(newUser)
-
-    userManager.addUser(
-      newUser.first_name,
-      newUser.last_name,
-      newUser.email,
-      newUser.password,
-    ).then((result) => {
-      console.log(result)
-      req.session.user = { 
-        ...result
-       }
-      return res.redirect("/login")
-    })
-    .catch((error) => {
-      res.status(400).json(error.message)
-    })
-  });
+router.post("/register", passport.authenticate('register', {
+  successRedirect: '/',
+  failureRedirect: '/login',
+  failureFlash: true,
+}));
 
 module.exports = router;

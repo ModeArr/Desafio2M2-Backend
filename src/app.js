@@ -5,11 +5,13 @@ const productsRoutes = require("./routes/products.routes")
 const cartsRoutes = require("./routes/carts.routes")
 const viewRoutes = require("./routes/views.routes")
 const messagesRoutes = require("./routes/messages.routes")
-const sessionRoutes = require("./routes/sessions.routes");
-const mongoose = require('mongoose');
-const mongoStore = require("connect-mongo");
-const cookieParser = require("cookie-parser");
-const session = require("express-session");
+const sessionRoutes = require("./routes/sessions.routes")
+const mongoose = require('mongoose')
+const mongoStore = require("connect-mongo")
+const cookieParser = require("cookie-parser")
+const session = require("express-session")
+const initializePassport = require("./config/passport.config")
+const passport = require("passport")
 
 PORT = 8080
 API_PREFIX = "api"
@@ -52,6 +54,10 @@ const server = app.listen(PORT, () => {
 })
 const io = require('socket.io')(server);
 
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.engine("handlebars", handlebars.engine())
 app.set("views", path.join(`${__dirname}/views`))
 app.set("view engine", "handlebars")
@@ -62,5 +68,3 @@ app.use(`/${API_PREFIX}/carts`, cartsRoutes)
 app.use(`/${API_PREFIX}/messages`, messagesRoutes)
 app.use(`/${API_PREFIX}/sessions`, sessionRoutes)
 app.use('/', viewRoutes)
-
-
