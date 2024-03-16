@@ -1,10 +1,12 @@
 const passport = require("passport");
 const local = require("passport-local");
+const GithubStrategy = require("passport-github2");
 const DBUserManager = require("../dao/DBUserManager");
 const userModel = require("../dao/models/user.models");
 const userManager = new DBUserManager()
 
-
+const GITHUB_CLIENT_ID = "04b186f6bf114610bee3"; 
+const GITHUB_CLIENT_SECRET = "e47a226def5d0dc2592c0ca4c9b0a3df8e681418";
 
 const localStrategy = local.Strategy;
 
@@ -55,6 +57,36 @@ const initializePassport = () => {
           return done(null, user);
         } catch (error) {
           return done(error);
+        }
+      }
+    )
+  );
+
+  passport.use(
+    "github",
+    new GithubStrategy(
+      {
+        clientID: GITHUB_CLIENT_ID,
+        clientSecret: GITHUB_CLIENT_SECRET,
+        callbackURL: "http://localhost:8080/api/sessions/github/callback",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          let user = await userManager.checkUser(profile._json?.email);
+          if (!user) {
+            let addNewUser = {
+              first_name: profile._json.name,
+              last_name: "No LastName", //areglar esto
+              email: profile._json?.email,
+              password: "GenerarPassHasheadaRandom", //y esto
+            };
+            let newUser = await userManager.addUser(addNewUser.first_name, addNewUser.last_name, addNewUser.email, addNewUser.password);
+            done(null, newUser);
+          } else {
+            done(null, user);
+          }
+        } catch (error) {
+          done(error);
         }
       }
     )

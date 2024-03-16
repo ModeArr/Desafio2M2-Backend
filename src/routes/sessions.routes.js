@@ -22,4 +22,18 @@ router.post("/register", passport.authenticate('register', {
   failureFlash: true,
 }));
 
+router.get(
+  "/github",
+  passport.authenticate("github", { 
+    scope: ["user:email"]})
+);
+
+router.get(
+  "/github/callback",
+  passport.authenticate("github", { 
+    failureRedirect: "/login",
+    successRedirect: '/',
+})
+);
+
 module.exports = router;
